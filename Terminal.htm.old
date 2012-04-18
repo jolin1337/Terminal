@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<!-- saved from url=(0051)http://dl.dropbox.com/u/2210422/Terminal/index.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<title>Terminal</title>
+<script src="./Terminal_files/jquery.min.js"></script>
+<script src="../src/core.js"></script>
+<script src="./terminal.js"></script>
+<style type="text/css">
+* {
+	padding: 0;
+	margin: 0;
+	border: 0;
+	outline: none;
+}
+p{margin-top:20px;}
+body {
+	background: black;
+	color: #FFFFFF;
+	font-family: monospace;
+	font-size: 16px;
+}
+#old {
+	position: absolute;
+	bottom: 25px;
+	left: 0px;
+	height:90%;
+	width:100%;
+	overflow-y:auto;
+	padding-bottom:50px;
+}
+#input_box {
+	font-size: 16px;
+	position:absolute;
+	bottom: 0px;
+	left: 0px;
+	border-top: 0px solid #536edc;
+	outline: none;
+	margin-left: -1px;
+	padding: 0 0 0 60px;
+	height: 20px;
+	background: black;
+	color: white;
+	font-family: monospace;
+	width: 100%-60px;
+}
+.arrows {
+	z-index: 1;
+	position: fixed;
+	left: 0px;
+	bottom: 0px;
+}
+.error{
+	color:#DC6060;
+}
+.print{
+	color:#6080FF;
+}
+</style>
+<script type="text/javascript">
+var old_value='';
+var com;
+var arg;
+$(document).ready(function(){              
+	inout("<span class='print' >JAVASCRIPT CONSOLE 0.1 (Maj 21 2011) <p>"+
+		"Conmmand History:&nbsp;&nbsp;&nbsp;&nbsp;Up/Down Arrow<br/>"+
+		"Cursor:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Left/Right Home/End<br/>"+
+		"Remove:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Backspace/Delete<br/>"+
+		"Execute:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enter<br/>"+
+		"Autocomplete:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ctrl+Space<br/>"+
+		"Ctrl +/- Wheel:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Zoom<br/>"+
+		"Built Modules:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Jjs, Jjs.data, Jjs.ops, Jjs.props, Jjs.types, Jjs.context, Jjs.utils, bgl, blf, mathutils<br/>"+
+		"Convenience Imports:&nbsp;mathutils.Import; math.Import</p></span>"
+	);
+});
+function enterKey(box){
+	com = arg = box.value;
+	if(com=="")return 0;
+	var func=new Function( "return (J3DL.Terminal." + (parseInt(com)||com.indexOf('(')==-1?"print("+com+")":com )+")");
+	try{
+		if(String(func()).replace("J3DL.","")=="undefined")throw(com);
+		com=String(func()).replace("J3DL.","");
+		if(!parseInt(com))
+			com=com=="[object Object]"?"":"<br/>"+com;
+		else
+			com="<br/>"+parseInt(com);
+		if(String(com).indexOf("\n")!=-1){
+			while(String(com).indexOf("\n")!=-1)
+				com=String(com).replace("\n","<br/>&nbsp;");
+		}
+		if (old_value!='')
+				old_value += "<br/>&gt;&gt;&gt;&nbsp;&nbsp;"+arg+"<span class='print' >&nbsp;"+com+"</span>";
+		else
+			old_value+="&gt;&gt;&gt;&nbsp;&nbsp;"+arg+"<span class='print' >&nbsp;"+com+"</span>";
+	}
+	catch(e){/*
+		if (old_value!="")
+				old_value += "<br/><span class='error' >"+e.message.replace("undefined",com)+"</span>";
+		else if(e.message)
+			old_value+="<span class='error' >"+e.message.replace("undefined",com)+"</span>";
+		else*/
+			old_value+="<div class='error' >Traceback (most recent call last):<br/> File \"< J3DL_console >\", line 1, in <module><br/>NameError: name '"+e+"' is not defined</div>";
+	}
+	var objDiv=document.getElementById('old');
+	//objDiv.scrollTop = objDiv.scrollHeight-objDiv.offsetHeight+1000;
+	objDiv.scrollTop = objDiv.scrollHeight;
+	console.log(objDiv.scrollHeight);
+	$('#old').html(old_value);
+	box.value='';
+}
+function inout(str){
+	old_value+=str;
+	$('#old').html(old_value);
+}
+</script>
+</head>
+<body onfocus="document.getElementById('input_box').focus();" >
+	<div id="old" onfocus="document.getElementById('input_box').focus();"></div>
+	<span class="arrows">&gt;&gt;&gt;</span><input type="text" autofocus onBlur="setTimeout(function(){document.getElementById('input_box').focus()},0);"  id="input_box" onkeydown="if(event.keyCode==13){enterKey(this);}">
+
+</body></html>

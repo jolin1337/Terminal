@@ -1,0 +1,19 @@
+lib={
+	dir:function(o){
+		o=(typeof o=='object'?o:false)||lib;
+		var ans=[];
+		for(var i in o)and[i]=i;return ans;
+	},
+	print:function(str){
+		if(str)return str;
+		else return "<div class='error' >Traceback (most recent call last):<br/> File \"< J3DL_console >\", line 1, in <module><br/>NameError: name '"+str+"' is not defined</div>";
+	},
+	Import:{
+		Jjs:function(){
+			var obj={};
+			obj.__builtins__=function(){};
+			dir(obj);
+			return obj;
+		}
+	}
+};

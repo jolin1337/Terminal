@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<!-- saved from url=(0051)http://dl.dropbox.com/u/2210422/Terminal/index.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<title>Terminal</title>
+<script src="./Terminal_files/jquery.min.js"></script>
+<script src="../src/core.js"></script>
+<script src="./terminal.js"></script>
+<style type="text/css">
+* {
+	padding: 0;
+	margin: 0;
+	border: 0;
+	outline: none;
+}
+p,.error{margin-top:20px;}
+body {
+	background: black;
+	color: #FFFFFF;
+	font-family: monospace;
+	font-size: 16px;
+}
+#scrolling {
+	position: absolute;
+	bottom:0px;
+	left:0px;
+	width:100%;
+	height:100%;
+	overflow: hidden;
+}
+#old {
+	position: absolute;
+	bottom:0px;
+	left:0px;
+	height:auto;
+	width:100%;
+	overflow: visible;
+	padding-bottom:50px;
+}
+#input-div {
+	position: absolute;
+	bottom:0px;
+	left:0px;
+	width: 100%;
+	border:0px solid #fff;
+	overflow:hidden;
+}
+#input-div:before{
+}
+#input_box{
+	font-size: 16px;
+	outline: none;
+	height: 20px;
+	background: black;
+	color: white;
+	font-family: monospace;
+	padding:0 0 0 60px;
+	width:100%;
+	float:left;
+}
+.arrows {
+	position:relative;
+	top:20px;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-o-user-select: none;
+	user-select: none;
+}
+.error{
+	color:#DC6060;
+}
+.print{
+	color:#6080FF;
+	
+}
+</style>
+<script type="text/javascript">
+var old_value='', com, arg;
+var scrolling;
+$(document).ready(function(){              
+	inout("<span class='print' >JAVASCRIPT CONSOLE 0.1 (Maj 21 2011) <p>"+
+		"Conmmand History:&nbsp;&nbsp;&nbsp;&nbsp;Up/Down Arrow<br/>"+
+		"Cursor:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Left/Right Home/End<br/>"+
+		"Remove:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Backspace/Delete<br/>"+
+		"Execute:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enter<br/>"+
+		"Autocomplete:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ctrl+Space<br/>"+
+		"Ctrl +/- Wheel:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Zoom<br/>"+
+		"Built Modules:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Jjs, Jjs.data, Jjs.ops, Jjs.props, Jjs.types, Jjs.context, Jjs.utils, bgl, blf, mathutils<br/>"+
+		"Convenience Imports:&nbsp;mathutils.Import; math.Import</p></span>"
+	);
+	
+	scrolling = new (function(){
+		this.yscroll = 0;
+		this.xscroll = 0;
+		this.objectToScroll = document.querySelector("#old");
+		var clickflag = false;
+		this.scrollNow = function(e){
+			if(clickflag){
+				var delta = this.yscroll - e.clientY;
+				if( this.objectToScroll.offsetTop - delta < 0 )
+						this.objectToScroll.style.top = (this.objectToScroll.offsetTop - delta) + "px";
+
+				this.yscroll = e.clientY;
+				this.xscroll = e.clientX;
+			}
+		};
+		this.scrollDown = function(e){
+			this.yscroll = e.clientY;
+			this.xscroll = e.clientX;
+			clickflag = true;
+		};
+		this.scrollUp = function(e){
+			clickflag = false;
+		};
+	})();
+});
+function enterKey(box,event,undefined){
+	if(event.keyCode==13){
+		com = arg = box.value;
+		if(com=="")return 0;
+		var func=new Function( "return (J3DL.Terminal." + (parseInt(com)||com.indexOf('(')==-1?"print("+com+")":com.replace("J3DL","J3DL.Terminal.J3DL") )+")");
+		try{
+			var ans = String(func()).replace("J3DL.","");
+			if(ans==undefined)throw(com);
+			com=ans;
+			//if(!parseInt(com))
+			//	com=(typeof com=="object"?"":"<br/>"+com);
+			if(parseInt(com))
+				com="<br/>"+parseInt(com);
+			else com="<br/>"+com;
+			if(String(com).indexOf("\n")!=-1){
+				while(String(com).indexOf("\n")!=-1)
+					com=String(com).replace("\n","<br/>&nbsp;");
+			}
+			if (old_value!='')
+					old_value += "<br/>&gt;&gt;&gt;&nbsp;&nbsp;"+arg+"<span class='print' >&nbsp;"+com+"</span>";
+			else
+				old_value+="&gt;&gt;&gt;&nbsp;&nbsp;"+arg+"<span class='print' >&nbsp;"+com+"</span>";
+		}
+		catch(e){/*
+			if (old_value!="")
+					old_value += "<br/><span class='error' >"+e.message.replace("undefined",com)+"</span>";
+			else if(e.message)
+				old_value+="<span class='error' >"+e.message.replace("undefined",com)+"</span>";
+			else*/
+				old_value+="<div class='error' >Traceback (most recent call last):<br/> File \"< J3DL_console >\", line 1, in <module><br/>NameError: name '"+e.toString().replace(/J3DL.Terminal./g,"")+"'</div>";
+		}
+		//var objDiv=document.querySelector('#old');
+		//objDiv.scrollTop = objDiv.scrollHeight-objDiv.offsetHeight+1000;
+		//objDiv.scrollTop = 100000;
+		//objDiv.style.marginTop = (-objDiv.scrollHeight + 300) + "px";
+		//console.log(objDiv.scrollHeight);
+		$('#old').html(old_value);
+		$('#old')[0].style.top="auto";
+		box.value='';
+	}
+}
+function inout(str){
+	old_value+=str;
+	$('#old').html(old_value);
+}
+</script>
+</head>
+<body onfocus="document.getElementById('input_box').focus();" >
+	<div id="scrolling" onmouseup="scrolling.scrollUp(event);" onmousedown="scrolling.scrollDown(event)" onmousemove="scrolling.scrollNow(event)" >
+		<div id="old" onfocus="document.getElementById('input_box').focus();"></div>
+	</div>
+	<div id="input-div" >
+		<span onselectstart="return false;" class="arrows">&gt;&gt;&gt;</span>
+		<input type="text" autofocus onBlur="this.focus();var input_box=this;setTimeout(function(){input_box.focus()},10);"  id="input_box" onkeydown="enterKey(this,event);">
+		<input type="text" style="background:black;color:black;" value="disable defocusing" onfocus="this.blur();"  />
+	</div>
+</body></html>
